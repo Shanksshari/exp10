@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -8,7 +7,6 @@ pipeline {
     }
 
     stages {
-
         stage('1. Checkout Code') {
             steps {
                 checkout scm
@@ -16,37 +14,36 @@ pipeline {
         }
 
         stage('2. Application Build & Test') {
-            steps {
-                sh 'mvn clean package'
-            }
-        }
+    steps {
+        echo "Checking Python installation..."
+
+        bat '"C:\\Users\\STUDENT\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" --version'
+
+        echo "Verifying Python syntax..."
+
+        bat '"C:\\Users\\STUDENT\\AppData\\Local\\Programs\\Python\\Python313\\python.exe" -m py_compile app.py'
+
+        echo "Python syntax verification successful!"
+    }
+}
 
         stage('3. Build & Tag Docker Image') {
             steps {
-                sh """
-                    docker build -t ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} \
-                    -t ${REGISTRY}/${IMAGE_NAME}:latest .
-                """
+                bat "docker build -t ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} -t ${REGISTRY}/${IMAGE_NAME}:latest ."
             }
         }
 
         stage('4. Push Image to Registry') {
             steps {
-                sh """
-                    docker push ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
-                    docker push ${REGISTRY}/${IMAGE_NAME}:latest
-                """
+                bat "docker push ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}"
+                bat "docker push ${REGISTRY}/${IMAGE_NAME}:latest"
             }
         }
     }
 
     post {
         success {
-            echo "Pipeline succeeded! Image ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} is available in the registry."
-        }
-
-        failure {
-            echo "Pipeline failed! Check the Jenkins console output."
+            echo "Pipeline succeeded! Image ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} is available locally and in the registry."
         }
     }
 }
